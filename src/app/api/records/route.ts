@@ -1,0 +1,85 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { reflectionSchema } from "@/lib/ai/reflection-schema";
+import { createClient } from "@/lib/supabase/server";
+
+const saveSchema = z.object({
+  eventText: z.string().min(10),
+  emotionTags: z.array(z.string()).default([]),
+  emotionIntensity: z.number().int().min(1).max(10),
+  relatedPerson: z.string().optional(),
+  reflection: reflectionSchema,
+});
+
+export async function GET() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { data, error } = await supabase
+    .from("reflection_records")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json(data);
+}
+
+export async function POST(request: Request) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const parsed = saveSchema.safeParse(await request.json());
+  if (!parsed.success) return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+
+  const { eventText, emotionTags, emotionIntensity, relatedPerson, reflection } = parsed.data;
+  const { data, error } = await supabase
+    .from("reflection_records")
+    .insert({
+      user_id: user.id,
+      event_text: eventText,
+      emotion_tags: emotionTags,
+      emotion_intensity: emotionIntensity,
+      related_person: relatedPerson || null,
+      title: reflection.title,
+      summary: reflection.summary,
+      gentle_response: reflection.gentle_response,
+      emotional_root: reflection.emotional_root,
+      underlying_needs: reflection.underlying_needs,
+      pattern: reflection.pattern,
+      prescriptions: reflection.prescriptions,
+      future_self_note: reflection.future_self_note,
+      compass_updates: reflection.compass_updates,
+      safety_note: reflection.safety_note,
+    })
+    .select()
+    .single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  for (const update of reflection.compass_updates) {
+    await supabase.from("person_profiles").upsert(
+      {
+        user_id: user.id,
+        relationship_type: update.relationship_type,
+        nickname: update.nickname,
+        related_record_count: 1,
+        common_triggers: update.common_triggers,
+        relationship_pattern_summary: update.relationship_pattern_summary,
+        mbti_tendency: update.mbti_tendency,
+        interaction_guide: update.interaction_guide,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id,relationship_type,nickname" },
+    );
+  }
+
+  return NextResponse.json(data);
+}
