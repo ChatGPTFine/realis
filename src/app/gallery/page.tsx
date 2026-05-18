@@ -1,8 +1,14 @@
 import Link from "next/link";
 import type { ReflectionRecord } from "@/lib/records/types";
+import { isE2EMode } from "@/lib/e2e/mock-reflection";
+import { getE2ERecords } from "@/lib/e2e/store";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 
 export default async function GalleryPage() {
+  if (isE2EMode()) {
+    return <Gallery records={getE2ERecords()} />;
+  }
+
   if (!isSupabaseConfigured()) {
     return <SetupRequired title="时光画廊" />;
   }
@@ -23,17 +29,21 @@ export default async function GalleryPage() {
 
   const list = (records || []) as ReflectionRecord[];
 
+  return <Gallery records={list} />;
+}
+
+function Gallery({ records }: { records: ReflectionRecord[] }) {
   return (
     <main className="mx-auto w-full max-w-6xl px-6 py-12">
       <div className="mb-8">
         <p className="text-sm font-semibold text-[#7b927f]">Time Gallery</p>
-        <h1 className="mt-2 text-4xl font-semibold">时光画廊</h1>
+        <h1 className="mt-2 text-4xl font-semibold">记忆画廊</h1>
         <p className="mt-4 max-w-2xl leading-7 text-[#65706d]">
           这里保存你每一次完成的私密觉察。未来的你可以按时间回看，当时那个自己真正需要什么。
         </p>
       </div>
 
-      {list.length === 0 ? (
+      {records.length === 0 ? (
         <section className="rounded-lg border border-dashed border-[#d9e1dc] p-8">
           <h2 className="text-2xl font-semibold">还没有保存的记录</h2>
           <p className="mt-3 text-[#65706d]">从一次 AI 觉察开始，给未来的自己留下一盏灯。</p>
@@ -43,7 +53,7 @@ export default async function GalleryPage() {
         </section>
       ) : (
         <section className="grid gap-4 md:grid-cols-2">
-          {list.map((record) => (
+          {records.map((record) => (
             <article className="rounded-lg border border-[#d9e1dc] bg-white p-5 shadow-sm" key={record.id}>
               <time className="text-sm text-[#65706d]">{new Date(record.created_at).toLocaleDateString("zh-CN")}</time>
               <h2 className="mt-2 text-2xl font-semibold">{record.title}</h2>

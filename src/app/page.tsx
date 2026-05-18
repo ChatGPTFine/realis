@@ -1,23 +1,32 @@
 import Link from "next/link";
+import { getLocaleFromSearchParam, t } from "@/lib/i18n";
 
-export default function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>;
+}) {
+  const params = await searchParams;
+  const locale = getLocaleFromSearchParam(params.lang);
+
   return (
     <main>
       <section className="mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-6xl items-center gap-12 px-6 py-16 lg:grid-cols-[1fr_0.9fr]">
         <div>
-          <p className="mb-4 text-sm font-semibold text-[#7b927f]">Realis</p>
-          <h1 className="max-w-3xl text-5xl font-semibold leading-tight">
-            写下今天发生的事，看见情绪背后的需要。
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-[#65706d]">
-            Realis 用 AI 帮你把具体事件整理成温柔、清晰、可回看的觉察记录，并沉淀成你的私密时光画廊和人际罗盘。
-          </p>
+          <div className="mb-4 flex items-center gap-4">
+            <p className="text-sm font-semibold text-[#7b927f]">Realis</p>
+            <Link className="rounded-md border border-[#d9e1dc] bg-white px-3 py-1 text-sm" href={t(locale, "home.langHref")}>
+              {t(locale, "home.langTarget")}
+            </Link>
+          </div>
+          <h1 className="max-w-3xl text-5xl font-semibold leading-tight">{t(locale, "home.title")}</h1>
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-[#65706d]">{t(locale, "home.body")}</p>
           <div className="mt-10 flex flex-wrap gap-3">
             <Link className="rounded-md bg-[#7b927f] px-5 py-3 font-medium text-white" href="/reflect">
-              开始觉察
+              {t(locale, "home.start")}
             </Link>
             <Link className="rounded-md border border-[#d9e1dc] bg-white px-5 py-3 font-medium text-[#24302f]" href="/auth">
-              登录 / 注册
+              {t(locale, "home.auth")}
             </Link>
           </div>
           <p className="mt-6 max-w-xl text-sm leading-6 text-[#65706d]">

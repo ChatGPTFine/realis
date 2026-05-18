@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { reflectionSchema } from "@/lib/ai/reflection-schema";
+import { isE2EMode } from "@/lib/e2e/mock-reflection";
+import { getE2ERecords, saveE2ERecord } from "@/lib/e2e/store";
 import { createClient } from "@/lib/supabase/server";
 
 const saveSchema = z.object({
@@ -12,6 +14,10 @@ const saveSchema = z.object({
 });
 
 export async function GET() {
+  if (isE2EMode()) {
+    return NextResponse.json(getE2ERecords());
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -29,6 +35,17 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  if (isE2EMode()) {
+    const body = await request.json();
+    const record = saveE2ERecord({
+      eventText: body.eventText,
+      emotionTags: body.emotionTags || [],
+      emotionIntensity: body.emotionIntensity || 5,
+      relatedPerson: body.relatedPerson,
+    });
+    return NextResponse.json(record);
+  }
+
   const supabase = await createClient();
   const {
     data: { user },

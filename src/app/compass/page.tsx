@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { isE2EMode } from "@/lib/e2e/mock-reflection";
+import { getE2ERecords } from "@/lib/e2e/store";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 
 type PersonProfile = {
@@ -13,6 +15,22 @@ type PersonProfile = {
 };
 
 export default async function CompassPage() {
+  if (isE2EMode()) {
+    const profiles = getE2ERecords().flatMap((record) =>
+      record.compass_updates.map((update, index) => ({
+        id: `${record.id}-${index}`,
+        relationship_type: update.relationship_type,
+        nickname: update.nickname,
+        related_record_count: 1,
+        common_triggers: update.common_triggers,
+        relationship_pattern_summary: update.relationship_pattern_summary,
+        mbti_tendency: update.mbti_tendency,
+        interaction_guide: update.interaction_guide,
+      })),
+    );
+    return <Compass profiles={profiles} />;
+  }
+
   if (!isSupabaseConfigured()) {
     return <SetupRequired />;
   }
@@ -41,6 +59,10 @@ export default async function CompassPage() {
 
   const profiles = (data || []) as PersonProfile[];
 
+  return <Compass profiles={profiles} />;
+}
+
+function Compass({ profiles }: { profiles: PersonProfile[] }) {
   return (
     <main className="mx-auto w-full max-w-6xl px-6 py-12">
       <div className="mb-8">

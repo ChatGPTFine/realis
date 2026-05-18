@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { buildReflectionPrompt } from "@/lib/ai/prompt";
 import { reflectionSchema } from "@/lib/ai/reflection-schema";
+import { getMockReflection, isE2EMode } from "@/lib/e2e/mock-reflection";
 import { createClient } from "@/lib/supabase/server";
 
 const inputSchema = z.object({
@@ -13,6 +14,10 @@ const inputSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  if (isE2EMode()) {
+    return NextResponse.json(getMockReflection());
+  }
+
   const supabase = await createClient();
   const {
     data: { user },

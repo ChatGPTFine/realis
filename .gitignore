@@ -12,3 +12,6 @@ yarn-error.log*
 .superpowers/
 .npm-cache/
 *.tsbuildinfo
+.playwright-browsers/
+test-results/
+playwright-report/
