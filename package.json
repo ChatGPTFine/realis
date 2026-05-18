@@ -6,8 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "typecheck": "tsc --noEmit",
-    "lint": "tsc --noEmit",
+    "typecheck": "tsc -p tsconfig.typecheck.json --noEmit",
+    "lint": "tsc -p tsconfig.typecheck.json --noEmit",
     "test:run": "vitest run",
     "e2e": "node scripts/run-e2e.mjs",
     "e2e:ui": "node scripts/run-e2e.mjs --ui"

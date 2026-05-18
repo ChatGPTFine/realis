@@ -2,6 +2,7 @@ import OpenAI from "openai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { buildReflectionPrompt } from "@/lib/ai/prompt";
+import { getOpenAIClientOptions } from "@/lib/ai/openai-config";
 import { reflectionSchema } from "@/lib/ai/reflection-schema";
 import { getMockReflection, isE2EMode } from "@/lib/e2e/mock-reflection";
 import { createClient } from "@/lib/supabase/server";
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "请输入更具体的事件。" }, { status: 400 });
   }
 
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const openai = new OpenAI(getOpenAIClientOptions(process.env));
   const completion = await openai.chat.completions.create({
     model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
     messages: [
