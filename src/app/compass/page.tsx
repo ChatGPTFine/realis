@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 
 type PersonProfile = {
   id: string;
@@ -13,6 +13,10 @@ type PersonProfile = {
 };
 
 export default async function CompassPage() {
+  if (!isSupabaseConfigured()) {
+    return <SetupRequired />;
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -83,5 +87,17 @@ function Section({ children, title }: { children: React.ReactNode; title: string
       <h3 className="font-medium">{title}</h3>
       <p className="mt-1 text-sm leading-6 text-[#65706d]">{children}</p>
     </div>
+  );
+}
+
+function SetupRequired() {
+  return (
+    <main className="mx-auto w-full max-w-3xl px-6 py-16">
+      <h1 className="text-4xl font-semibold">人际罗盘</h1>
+      <p className="mt-4 leading-7 text-[#65706d]">
+        还没有配置 Supabase 环境变量。请复制 <code>.env.example</code> 为 <code>.env.local</code>，填入
+        Supabase URL 和 Anon Key 后重启开发服务器。
+      </p>
+    </main>
   );
 }

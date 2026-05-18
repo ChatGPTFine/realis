@@ -1,8 +1,12 @@
 import Link from "next/link";
 import type { ReflectionRecord } from "@/lib/records/types";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 
 export default async function GalleryPage() {
+  if (!isSupabaseConfigured()) {
+    return <SetupRequired title="时光画廊" />;
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -82,6 +86,18 @@ function LoginRequired({ title }: { title: string }) {
       <Link className="mt-6 inline-flex rounded-md bg-[#7b927f] px-5 py-3 font-medium text-white" href="/auth">
         登录 / 注册
       </Link>
+    </main>
+  );
+}
+
+function SetupRequired({ title }: { title: string }) {
+  return (
+    <main className="mx-auto w-full max-w-3xl px-6 py-16">
+      <h1 className="text-4xl font-semibold">{title}</h1>
+      <p className="mt-4 leading-7 text-[#65706d]">
+        还没有配置 Supabase 环境变量。请复制 <code>.env.example</code> 为 <code>.env.local</code>，填入
+        Supabase URL 和 Anon Key 后重启开发服务器。
+      </p>
     </main>
   );
 }
