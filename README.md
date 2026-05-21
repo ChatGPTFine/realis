@@ -26,3 +26,13 @@ Deploy the repository to Vercel and set the same environment variables in the Ve
 ## Safety
 
 AI reflection is not medical diagnosis or psychotherapy. If a user is in acute crisis, the product should guide them toward trusted people, local emergency support, or professional help.
+
+
+
+
+
+
+
+
+
+踩踩踩踩踩 
