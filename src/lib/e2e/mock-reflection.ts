@@ -23,9 +23,24 @@ export function getMockReflection(): ReflectionOutput {
       {
         relationship_type: "同事",
         nickname: "同事",
+        closeness_score: 3,
         common_triggers: ["贡献被忽略", "讨论节奏太快"],
         relationship_pattern_summary: "你在工作关系中很在意贡献是否被明确看见。",
-        mbti_tendency: "偏 Fi 的价值敏感，仅用于自我理解。",
+        mbti_tendency: "可能呈现偏 Fi 的价值敏感与 Te 的结果压力，仅用于自我理解。",
+        jungian_functions: [
+          {
+            code: "Fi",
+            tendency: "对个人价值、尊重感和真实感较敏感",
+            evidence: "用户反复提到认真准备没有被看见",
+            score: 4,
+          },
+          {
+            code: "Te",
+            tendency: "希望贡献被清楚确认，并能推动事情有序前进",
+            evidence: "事件发生在会议和方案讨论场景",
+            score: 3,
+          },
+        ],
         interaction_guide: "用事实表达贡献和下一步请求，避免只在心里消化。",
       },
     ],

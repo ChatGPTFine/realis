@@ -1,22 +1,18 @@
+import { ArrowRight, Compass as CompassIcon, MessagesSquare, ShieldCheck, UsersRound } from "lucide-react";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { ButtonLink } from "@/components/ui/button";
+import { Card, SoftPanel } from "@/components/ui/card";
+import { RelationshipBoard, type RelationshipEvent, type RelationshipProfile } from "@/components/relationship-board";
 import { isE2EMode } from "@/lib/e2e/mock-reflection";
 import { getE2ERecords } from "@/lib/e2e/store";
+import type { ReflectionRecord } from "@/lib/records/types";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
-
-type PersonProfile = {
-  id: string;
-  relationship_type: string;
-  nickname: string;
-  related_record_count: number;
-  common_triggers: string[];
-  relationship_pattern_summary: string;
-  mbti_tendency: string;
-  interaction_guide: string;
-};
 
 export default async function CompassPage() {
   if (isE2EMode()) {
-    const profiles = getE2ERecords().flatMap((record) =>
+    const records = getE2ERecords();
+    const profiles = records.flatMap((record) =>
       record.compass_updates.map((update, index) => ({
         id: `${record.id}-${index}`,
         relationship_type: update.relationship_type,
@@ -25,10 +21,12 @@ export default async function CompassPage() {
         common_triggers: update.common_triggers,
         relationship_pattern_summary: update.relationship_pattern_summary,
         mbti_tendency: update.mbti_tendency,
+        jungian_functions: update.jungian_functions,
+        closeness_score: update.closeness_score,
         interaction_guide: update.interaction_guide,
       })),
     );
-    return <Compass profiles={profiles} />;
+    return <Compass events={toRelationshipEvents(records)} profiles={profiles} />;
   }
 
   if (!isSupabaseConfigured()) {
@@ -41,85 +39,161 @@ export default async function CompassPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return (
-      <main className="mx-auto w-full max-w-3xl px-6 py-16">
-        <h1 className="text-4xl font-semibold">人际罗盘</h1>
-        <p className="mt-4 leading-7 text-[#65706d]">这里会沉淀你和重要他人的关系画像，请先登录。</p>
-        <Link className="mt-6 inline-flex rounded-md bg-[#7b927f] px-5 py-3 font-medium text-white" href="/auth">
-          登录 / 注册
-        </Link>
-      </main>
-    );
+    return <LoginRequired />;
   }
 
-  const { data } = await supabase
-    .from("person_profiles")
-    .select("*")
-    .order("updated_at", { ascending: false });
+  const [{ data: profilesData }, { data: recordsData }] = await Promise.all([
+    supabase.from("person_profiles").select("*").order("updated_at", { ascending: false }),
+    supabase.from("reflection_records").select("*").order("created_at", { ascending: false }),
+  ]);
 
-  const profiles = (data || []) as PersonProfile[];
-
-  return <Compass profiles={profiles} />;
+  return (
+    <Compass
+      events={toRelationshipEvents((recordsData || []) as ReflectionRecord[])}
+      profiles={(profilesData || []) as RelationshipProfile[]}
+    />
+  );
 }
 
-function Compass({ profiles }: { profiles: PersonProfile[] }) {
+function Compass({
+  events,
+  profiles,
+}: {
+  events: RelationshipEvent[];
+  profiles: RelationshipProfile[];
+}) {
   return (
-    <main className="mx-auto w-full max-w-6xl px-6 py-12">
-      <div className="mb-8">
-        <p className="text-sm font-semibold text-[#7b927f]">Relationship Compass</p>
-        <h1 className="mt-2 text-4xl font-semibold">人际罗盘</h1>
-        <p className="mt-4 max-w-2xl leading-7 text-[#65706d]">
-          从你的记录里慢慢看见：哪些关系最容易触发你，你真正需要怎样被对待。
-        </p>
-        <p className="mt-3 rounded-md bg-[#eef4ef] p-3 text-sm text-[#4f6254]">
-          MBTI 倾向仅用于自我理解，不代表诊断或固定人格。
-        </p>
-      </div>
+    <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:py-14">
+      <section className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+        <div>
+          <Badge>Relationship Map</Badge>
+          <h1 className="text-balance mt-5 max-w-3xl text-4xl font-semibold leading-tight text-ink sm:text-5xl">
+            人际罗盘
+          </h1>
+          <p className="mt-5 max-w-2xl text-lg leading-8 text-muted">
+            这里更像一张个人关系图谱：人物、关系、MBTI、触发事件和沟通建议，会随着每次觉察慢慢沉淀。
+          </p>
+          <p className="font-sans-soft mt-5 inline-flex rounded-full border border-line bg-white/58 px-4 py-2 text-sm text-muted">
+            MBTI 倾向仅用于自我理解，不代表诊断或固定人格。
+          </p>
+        </div>
 
-      {profiles.length === 0 ? (
-        <section className="rounded-lg border border-dashed border-[#d9e1dc] p-8">
-          <h2 className="text-2xl font-semibold">罗盘还在等待第一条线索</h2>
-          <p className="mt-3 text-[#65706d]">保存一条带有相关人物的 AI 觉察后，这里会开始生成关系画像。</p>
-          <Link className="mt-6 inline-flex rounded-md bg-[#7b927f] px-5 py-3 font-medium text-white" href="/reflect">
-            去完成一次觉察
-          </Link>
-        </section>
-      ) : (
-        <section className="grid gap-4 md:grid-cols-2">
-          {profiles.map((profile) => (
-            <article className="rounded-lg border border-[#d9e1dc] bg-white p-5 shadow-sm" key={profile.id}>
-              <p className="text-sm text-[#65706d]">{profile.relationship_type}</p>
-              <h2 className="mt-1 text-2xl font-semibold">{profile.nickname}</h2>
-              <p className="mt-3 text-sm text-[#65706d]">相关记录：{profile.related_record_count}</p>
-              <Section title="常见触发点">{profile.common_triggers.join("、") || "还在观察中"}</Section>
-              <Section title="关系模式">{profile.relationship_pattern_summary || "还在观察中"}</Section>
-              <Section title="MBTI 倾向">{profile.mbti_tendency || "还在观察中"}</Section>
-              <Section title="相处指南">{profile.interaction_guide || "还在观察中"}</Section>
-            </article>
-          ))}
-        </section>
-      )}
+        <SoftPanel className="grid gap-5 p-6 sm:grid-cols-3">
+          <Metric icon={UsersRound} label="重要他人" value={profiles.length.toString()} />
+          <Metric
+            icon={MessagesSquare}
+            label="关联事件"
+            value={events.length.toString()}
+          />
+          <Metric
+            icon={ShieldCheck}
+            label="沟通建议"
+            value={profiles.length > 0 ? "已生成" : "等待中"}
+          />
+        </SoftPanel>
+      </section>
+
+      {profiles.length === 0 ? <EmptyCompass /> : <RelationshipBoard events={events} profiles={profiles} />}
     </main>
   );
 }
 
-function Section({ children, title }: { children: React.ReactNode; title: string }) {
+function toRelationshipEvents(records: ReflectionRecord[]): RelationshipEvent[] {
+  return records.map((record) => ({
+    id: record.id,
+    title: record.title,
+    event_text: record.event_text,
+    summary: record.summary,
+    related_person: record.related_person,
+    emotion_tags: record.emotion_tags,
+    created_at: record.created_at,
+    compass_updates: record.compass_updates.map((update) => ({
+      relationship_type: update.relationship_type,
+      nickname: update.nickname,
+    })),
+  }));
+}
+
+function Metric({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof UsersRound;
+  label: string;
+  value: string;
+}) {
   return (
-    <div className="mt-4 rounded-md bg-[#f7faf8] p-3">
-      <h3 className="font-medium">{title}</h3>
-      <p className="mt-1 text-sm leading-6 text-[#65706d]">{children}</p>
+    <div className="rounded-[24px] border border-line/70 bg-paper/70 p-4">
+      <Icon className="size-5 text-moss" />
+      <p className="font-sans-soft mt-5 text-xs text-muted">{label}</p>
+      <p className="mt-1 text-2xl font-semibold text-ink">{value}</p>
     </div>
+  );
+}
+
+function EmptyCompass() {
+  return (
+    <section className="mt-10 rounded-[34px] border border-dashed border-line bg-white/52 p-8 sm:p-10">
+      <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+        <div>
+          <span className="grid size-14 place-items-center rounded-2xl bg-sage/12 text-moss">
+            <CompassIcon className="size-6" />
+          </span>
+          <h2 className="mt-6 text-3xl font-semibold text-ink">关系图谱还在等待第一条线索</h2>
+          <p className="mt-4 max-w-xl leading-8 text-muted">
+            保存一条带有相关人物的 AI 觉察后，这里会开始生成人物节点、关系连线、MBTI 与沟通建议。
+          </p>
+          <ButtonLink className="mt-7" href="/reflect">
+            去完成一次觉察
+            <ArrowRight className="size-4" />
+          </ButtonLink>
+        </div>
+        <div className="relative min-h-72 rounded-[30px] border border-line/70 bg-[#efe5cf]">
+          <div className="absolute left-1/2 top-1/2 grid size-20 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-night text-paper">
+            我
+          </div>
+          <div className="absolute left-10 top-10 grid size-20 place-items-center rounded-full border border-line bg-white/70 text-sm text-muted">
+            朋友
+          </div>
+          <div className="absolute bottom-10 right-10 grid size-24 place-items-center rounded-full border border-line bg-white/70 text-sm text-muted">
+            伴侣
+          </div>
+          <div className="absolute right-14 top-16 grid size-16 place-items-center rounded-full border border-line bg-white/70 text-sm text-muted">
+            同事
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function LoginRequired() {
+  return (
+    <main className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6">
+      <Card className="p-8 sm:p-10">
+        <Badge>Private Space</Badge>
+        <h1 className="mt-5 text-4xl font-semibold text-ink">人际罗盘</h1>
+        <p className="mt-4 leading-8 text-muted">这里会沉淀你和重要他人的关系画像，请先登录。</p>
+        <Link className="font-sans-soft mt-7 inline-flex items-center gap-2 rounded-full bg-night px-5 py-3 text-sm font-medium text-paper" href="/auth">
+          登录 / 注册
+          <ArrowRight className="size-4" />
+        </Link>
+      </Card>
+    </main>
   );
 }
 
 function SetupRequired() {
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-16">
-      <h1 className="text-4xl font-semibold">人际罗盘</h1>
-      <p className="mt-4 leading-7 text-[#65706d]">
-        还没有配置 Supabase 环境变量。请复制 <code>.env.example</code> 为 <code>.env.local</code>，填入
-        Supabase URL 和 Anon Key 后重启开发服务器。
-      </p>
+    <main className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6">
+      <Card className="p-8 sm:p-10">
+        <Badge variant="warm">Setup</Badge>
+        <h1 className="mt-5 text-4xl font-semibold text-ink">人际罗盘</h1>
+        <p className="mt-4 leading-8 text-muted">
+          还没有配置 Supabase 环境变量。请根据 <code>.env.example</code> 补齐本地环境后重启服务。
+        </p>
+      </Card>
     </main>
   );
 }

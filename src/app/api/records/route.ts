@@ -91,6 +91,8 @@ export async function POST(request: Request) {
         common_triggers: update.common_triggers,
         relationship_pattern_summary: update.relationship_pattern_summary,
         mbti_tendency: update.mbti_tendency,
+        jungian_functions: update.jungian_functions,
+        closeness_score: update.closeness_score,
         interaction_guide: update.interaction_guide,
         updated_at: new Date().toISOString(),
       },

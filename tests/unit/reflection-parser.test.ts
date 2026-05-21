@@ -16,7 +16,25 @@ describe("parseReflectionContent", () => {
       action: ["行动"],
     },
     future_self_note: "给未来自己的话",
-    compass_updates: [],
+    compass_updates: [
+      {
+        relationship_type: "同事",
+        nickname: "同事",
+        closeness_score: 4,
+        common_triggers: ["贡献被忽略"],
+        relationship_pattern_summary: "在工作关系里很在意被看见。",
+        mbti_tendency: "偏 Fi，仅用于自我理解。",
+        jungian_functions: [
+          {
+            code: "Fi",
+            tendency: "重视真实感",
+            evidence: "用户提到准备没有被看见",
+            score: 4,
+          },
+        ],
+        interaction_guide: "用事实表达贡献和请求。",
+      },
+    ],
     safety_note: null,
   };
 
@@ -27,6 +45,13 @@ describe("parseReflectionContent", () => {
   it("parses JSON wrapped in markdown fences", () => {
     const content = `\`\`\`json\n${JSON.stringify(validReflection)}\n\`\`\``;
     expect(parseReflectionContent(content).underlying_needs).toEqual(["被看见"]);
+  });
+
+  it("keeps MBTI and Jungian function details for compass updates", () => {
+    const parsed = parseReflectionContent(JSON.stringify(validReflection));
+
+    expect(parsed.compass_updates[0].closeness_score).toBe(4);
+    expect(parsed.compass_updates[0].jungian_functions[0].code).toBe("Fi");
   });
 
   it("throws a stable error for invalid model output", () => {

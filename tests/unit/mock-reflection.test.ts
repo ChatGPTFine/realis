@@ -11,5 +11,7 @@ describe("getMockReflection", () => {
     expect(result.prescriptions.music.length).toBeGreaterThan(0);
     expect(result.prescriptions.action.length).toBeGreaterThan(0);
     expect(result.compass_updates[0].nickname).toBeTruthy();
+    expect(result.compass_updates[0].closeness_score).toBeGreaterThan(0);
+    expect(result.compass_updates[0].jungian_functions[0].code).toBe("Fi");
   });
 });

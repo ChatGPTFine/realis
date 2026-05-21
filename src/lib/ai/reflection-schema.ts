@@ -7,12 +7,21 @@ export const healingPrescriptionSchema = z.object({
   action: z.array(z.string()).default([]),
 });
 
+export const jungianFunctionSchema = z.object({
+  code: z.enum(["Ni", "Ne", "Si", "Se", "Ti", "Te", "Fi", "Fe"]),
+  tendency: z.string(),
+  evidence: z.string(),
+  score: z.number().int().min(1).max(5).default(3),
+});
+
 export const compassUpdateSchema = z.object({
   relationship_type: z.string(),
   nickname: z.string(),
+  closeness_score: z.number().int().min(1).max(5).default(3),
   common_triggers: z.array(z.string()).default([]),
   relationship_pattern_summary: z.string(),
   mbti_tendency: z.string(),
+  jungian_functions: z.array(jungianFunctionSchema).default([]),
   interaction_guide: z.string(),
 });
 
@@ -29,4 +38,5 @@ export const reflectionSchema = z.object({
   safety_note: z.string().nullable().default(null),
 });
 
+export type JungianFunctionInsight = z.infer<typeof jungianFunctionSchema>;
 export type ReflectionOutput = z.infer<typeof reflectionSchema>;

@@ -5,7 +5,7 @@ const messages = {
     "nav.reflect": "AI觉察",
     "home.title": "写下今天发生的事，看见情绪背后的需要。",
     "home.body":
-      "Realis 用 AI 帮你把具体事件整理成温柔、清晰、可回看的觉察记录，并沉淀成你的私密记忆画廊和人际罗盘。",
+      "Realis / 返照用 AI 把具体事件整理成温柔、清晰、可回看的觉察信，并沉淀成你的私密记忆画廊和人际罗盘。",
     "home.start": "开始觉察",
     "home.auth": "登录 / 注册",
     "home.langTarget": "EN",
@@ -15,7 +15,7 @@ const messages = {
     "nav.reflect": "AI Reflection",
     "home.title": "Write down what happened today and see the need beneath the emotion.",
     "home.body":
-      "Realis turns concrete moments into gentle, structured AI reflections you can revisit in your private memory gallery and relationship compass.",
+      "Realis turns concrete moments into gentle, structured AI reflection letters you can revisit in your private memory gallery and relationship compass.",
     "home.start": "Start Reflection",
     "home.auth": "Log in / Sign up",
     "home.langTarget": "中文",

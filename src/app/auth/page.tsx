@@ -17,20 +17,20 @@ export default async function AuthPage({
       <div className="mb-8">
         <p className="text-sm font-semibold text-[#7b927f]">私密账号</p>
         <h1 className="mt-2 text-4xl font-semibold">{isSignup ? "注册 Realis" : "登录 Realis"}</h1>
-        <p className="mt-4 max-w-2xl leading-7 text-[#65706d]">
+        <p className="mt-4 max-w-2xl leading-7 text-muted">
           你的记录默认只对你自己可见。登录后，AI 觉察、时光画廊和人际罗盘都会保存到你的账号里。
         </p>
       </div>
 
       {params.error ? (
-        <p className="mb-5 rounded-md border border-[#e6d2c8] bg-[#fff7f3] p-3 text-sm leading-6 text-[#8a4b39]">
+        <p className="mb-5 rounded-lg border border-[#e7c7bd] bg-[#fff7f3] p-3 text-sm text-[#8a4b39]">
           {isSignup ? "注册失败：" : "登录失败："}
           {params.error}
         </p>
       ) : null}
 
       <form action={isSignup ? signUp : signIn} className="rounded-lg border border-[#d9e1dc] bg-white p-6 shadow-sm">
-        <label className="block text-sm font-medium text-[#65706d]" htmlFor="email">
+        <label className="block text-sm font-medium text-muted" htmlFor="email">
           邮箱
         </label>
         <input
@@ -42,7 +42,7 @@ export default async function AuthPage({
           type="email"
         />
 
-        <label className="mt-4 block text-sm font-medium text-[#65706d]" htmlFor="password">
+        <label className="mt-4 block text-sm font-medium text-muted" htmlFor="password">
           密码
         </label>
         <input
@@ -60,18 +60,18 @@ export default async function AuthPage({
         </button>
       </form>
 
-      <div className="mt-5 rounded-lg border border-[#d9e1dc] bg-[#f7faf8] p-4 text-sm leading-6 text-[#65706d]">
+      <div className="mt-5 rounded-lg border border-[#d9e1dc] bg-[#f7faf8] p-4 text-sm leading-6 text-muted">
         {isSignup ? (
           <p>
             已有账号？
-            <Link className="font-medium text-[#24302f] underline underline-offset-4" href="/auth">
+            <Link className="font-medium text-[#57725f] underline underline-offset-4" href="/auth">
               返回登录
             </Link>
           </p>
         ) : (
           <p>
             还没有账号？
-            <Link className="font-medium text-[#24302f] underline underline-offset-4" href="/auth?mode=signup">
+            <Link className="font-medium text-[#57725f] underline underline-offset-4" href="/auth?mode=signup">
               先注册一个
             </Link>
           </p>

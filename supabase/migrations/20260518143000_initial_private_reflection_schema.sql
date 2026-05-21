@@ -28,6 +28,8 @@ create table if not exists public.person_profiles (
   common_triggers text[] not null default '{}',
   relationship_pattern_summary text not null default '',
   mbti_tendency text not null default '',
+  jungian_functions jsonb not null default '[]'::jsonb,
+  closeness_score integer not null default 3 check (closeness_score between 1 and 5),
   interaction_guide text not null default '',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),

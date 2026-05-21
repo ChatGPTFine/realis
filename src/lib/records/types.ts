@@ -5,12 +5,21 @@ export type HealingPrescription = {
   action: string[];
 };
 
+export type JungianFunctionInsight = {
+  code: "Ni" | "Ne" | "Si" | "Se" | "Ti" | "Te" | "Fi" | "Fe";
+  tendency: string;
+  evidence: string;
+  score: number;
+};
+
 export type CompassUpdate = {
   relationship_type: string;
   nickname: string;
+  closeness_score?: number;
   common_triggers: string[];
   relationship_pattern_summary: string;
   mbti_tendency: string;
+  jungian_functions?: JungianFunctionInsight[];
   interaction_guide: string;
 };
 

@@ -3,8 +3,8 @@ import "./globals.css";
 import { Navigation } from "@/components/navigation";
 
 export const metadata: Metadata = {
-  title: "Realis",
-  description: "私密的 AI 自我疗愈日记",
+  title: "Realis 返照",
+  description: "私密的 AI 心理陪伴与自我觉察空间",
 };
 
 export default function RootLayout({
@@ -14,7 +14,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
-      <body className="min-h-screen bg-[#f7faf8] text-[#24302f] antialiased">
+      <body className="min-h-screen antialiased">
+        <div className="grain" />
         <Navigation />
         {children}
       </body>
